@@ -1,58 +1,69 @@
 import React from 'react'
-import { FlatList, StatusBar, StyleSheet, Text, TextInput, View } from 'react-native'
+import { FlatList, RefreshControl, ScrollView, StatusBar, StyleSheet, Text, TextInput, View } from 'react-native'
 import { Avatar, Icon, ListItem } from 'react-native-elements'
 import { CSColor, CStyles } from '../assets'
-import { fp, hp, wp } from '../utils/responsive'
+import { hp, wp } from '../utils/responsive'
 import {DETAIL_CONTACT, FORM_CONTACT} from '../navigation/_const'
-import {FloatButton} from '../components'
-
-const list = [
-    {
-      name: 'Amy Farha',
-      avatar_url: 'https://i.pravatar.cc/400?img=64',
-      subtitle: 'Vice President'
-    },
-    {
-      name: 'Chris Jackson',
-      avatar_url: 'https://i.pravatar.cc/400?img=64',
-      subtitle: 'Vice Chairman'
-    },
-  ]
+import {FloatButton, PlaceHolder} from '../components'
+import { getListContacts } from '../redux/actions'
+import { useDispatch, useSelector } from 'react-redux'
 
 function Contacts(props) {
-    const renderItem = ({ item }) => (
-        <ListItem onPress={() => props.navigation.navigate(DETAIL_CONTACT)}>
-          <Avatar size="medium" avatarStyle={{borderRadius:10}} source={{uri: item.avatar_url}} />
-          <ListItem.Content>
-            <ListItem.Title>{item.name}</ListItem.Title>
-            <ListItem.Subtitle>{item.subtitle}</ListItem.Subtitle>
-          </ListItem.Content>
-        </ListItem>
-    )
-    return (
-        <View style={styles.container}>
-          <StatusBar backgroundColor={CSColor.white} barStyle="dark-content" />
-            <View style={{paddingVertical:hp(5)}}>
-                <Text style={{alignSelf:'center', fontSize:CStyles.fontSize.large}}>Contacts</Text>
-                <TextInput 
-                    style={{backgroundColor:CSColor.lightGray, marginHorizontal:wp(5), marginTop:wp(5), paddingHorizontal:wp(5)}}
-                    placeholder="Search name here"
-                />
-            </View>
-            <Text style={{fontSize:CStyles.fontSize.medium, marginHorizontal:wp(5)}}>My Contacts(21)</Text>
+  const dispatch = useDispatch()
+  const {listContacts, isLoading, message} = useSelector(state => state.contacts)
+
+  const fetchData = () => dispatch(getListContacts())
+  
+  React.useEffect(() => {
+    fetchData()
+  },[message])
+
+  const renderItem = ({ item }) => (
+      <ListItem onPress={() => props.navigation.navigate(DETAIL_CONTACT, {id:item.id})}>
+        <Avatar size="medium" avatarStyle={{borderRadius:10}} source={{uri: item.photo}} />
+        <ListItem.Content>
+          <ListItem.Title>{`${item.firstName} ${item.lastName}`}</ListItem.Title>
+          <ListItem.Subtitle>{item.age}</ListItem.Subtitle>
+        </ListItem.Content>
+      </ListItem>
+  )
+  return (
+      <ScrollView 
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+              refreshing={isLoading}
+              onRefresh={fetchData}
+          />
+      }
+      >
+        <StatusBar backgroundColor={CSColor.white} barStyle="dark-content" />
+          <View style={{paddingVertical:CStyles.margin.horizontal3}}>
+              <Text style={{alignSelf:'center', fontSize:CStyles.fontSize.large}}>Contacts</Text>
+              <TextInput 
+                  style={{backgroundColor:CSColor.lightGray, margin:wp(5), paddingHorizontal:wp(5)}}
+                  placeholder="Search name here"
+              />
+            <Text style={{fontSize:CStyles.fontSize.medium, marginHorizontal:wp(5)}}>My Contacts ({listContacts?.length})</Text>
+          </View>
+          {isLoading?
+            <PlaceHolder type="contacts"/>
+              :
             <FlatList
                 keyExtractor= {(item, index) => index.toString()}
-                data={list}
+                data={listContacts}
                 renderItem={renderItem}
             />
-            <FloatButton onPress={() => props.navigation.navigate(FORM_CONTACT)}>
-              <Icon
-                name='user-plus'
-                type='feather'
-              />
-            </FloatButton>
-        </View>
-    )
+          }
+    
+          <FloatButton onPress={() => props.navigation.navigate(FORM_CONTACT, {type:"Add new"})}>
+            <Icon
+              name='user-plus'
+              type='feather'
+            />
+          </FloatButton>
+      </ScrollView>
+  )
 }
 
 export {Contacts}
