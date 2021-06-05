@@ -7,16 +7,20 @@ import {DETAIL_CONTACT, FORM_CONTACT} from '../navigation/_const'
 import {FloatButton, PlaceHolder} from '../components'
 import { getListContacts } from '../redux/actions'
 import { useDispatch, useSelector } from 'react-redux'
+import {useIsFocused} from '@react-navigation/native'
 
 function Contacts(props) {
+  const isVisible = useIsFocused()
   const dispatch = useDispatch()
   const {listContacts, isLoading, message} = useSelector(state => state.contacts)
 
   const fetchData = () => dispatch(getListContacts())
   
   React.useEffect(() => {
-    fetchData()
-  },[message])
+    if(isVisible){
+      fetchData()
+    }
+  },[isVisible])
 
   const renderItem = ({ item }) => (
       <ListItem onPress={() => props.navigation.navigate(DETAIL_CONTACT, {id:item.id})}>
@@ -28,14 +32,8 @@ function Contacts(props) {
       </ListItem>
   )
   return (
-      <ScrollView 
+      <View 
         style={styles.container}
-        refreshControl={
-          <RefreshControl
-              refreshing={isLoading}
-              onRefresh={fetchData}
-          />
-      }
       >
         <StatusBar backgroundColor={CSColor.white} barStyle="dark-content" />
           <View style={{paddingVertical:CStyles.margin.horizontal3}}>
@@ -53,6 +51,8 @@ function Contacts(props) {
                 keyExtractor= {(item, index) => index.toString()}
                 data={listContacts}
                 renderItem={renderItem}
+                refreshing={isLoading}
+                onRefresh={() => fetchData()}
             />
           }
     
@@ -62,7 +62,7 @@ function Contacts(props) {
               type='feather'
             />
           </FloatButton>
-      </ScrollView>
+      </View>
   )
 }
 
