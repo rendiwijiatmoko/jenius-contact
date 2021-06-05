@@ -37,10 +37,11 @@ function Contacts(props) {
       >
         <StatusBar backgroundColor={CSColor.white} barStyle="dark-content" />
           <View style={{paddingVertical:CStyles.margin.horizontal3}}>
-              <Text style={{alignSelf:'center', fontSize:CStyles.fontSize.large}}>Contacts</Text>
+              <Text style={{alignSelf:'center', fontSize:CStyles.fontSize.large }}>Contacts</Text>
               <TextInput 
                   style={{backgroundColor:CSColor.lightGray, margin:wp(5), paddingHorizontal:wp(5)}}
                   placeholder="Search name here"
+                  placeholderTextColor={CSColor.black}
               />
             <Text style={{fontSize:CStyles.fontSize.medium, marginHorizontal:wp(5)}}>My Contacts ({listContacts?.length})</Text>
           </View>
